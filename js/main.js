@@ -112,7 +112,124 @@ document.addEventListener('DOMContentLoaded', () => {
             card.style.opacity = '1';
             card.style.transform = 'translateY(0)';
         }, 200 * (index + 1));
+        
+        // Добавляем атрибут data-text для имени студии
+        const studioName = document.querySelector('.studio-name');
+        if (studioName) {
+            studioName.setAttribute('data-text', studioName.textContent);
+        }
+        
+        // Добавляем 3D эффект карточкам при движении мыши
+        card.addEventListener('mousemove', handleCardMouseMove);
+        card.addEventListener('mouseleave', handleCardMouseLeave);
+        card.addEventListener('mouseenter', handleCardMouseEnter);
+        card.addEventListener('touchstart', handleCardTouchStart, { passive: true });
+        card.addEventListener('touchmove', handleCardTouchMove, { passive: true });
+        card.addEventListener('touchend', handleCardTouchEnd, { passive: true });
     });
+    
+    // Управление 3D эффектом карточек
+    function handleCardMouseMove(e) {
+        if (window.matchMedia('(hover: hover)').matches) {
+            const card = e.currentTarget;
+            const rect = card.getBoundingClientRect();
+            const centerX = rect.left + rect.width / 2;
+            const centerY = rect.top + rect.height / 2;
+            const mouseX = e.clientX;
+            const mouseY = e.clientY;
+            
+            // Рассчитываем смещение от центра в процентах
+            const percentX = (mouseX - centerX) / (rect.width / 2);
+            const percentY = (mouseY - centerY) / (rect.height / 2);
+            
+            // Изменяем и уменьшаем наклон до 6 градусов максимум
+            const tiltX = -percentY * 6; // Вертикальное движение
+            const tiltY = percentX * 6;  // Горизонтальное движение - исправляем направление
+            
+            // Применяем наклон и эффект глубины только к карточке
+            card.style.transform = `perspective(1000px) rotateX(${tiltX}deg) rotateY(${tiltY}deg) scale3d(1.02, 1.02, 1.02)`;
+            
+            // Убираем движение внутренних элементов
+            /*
+            if (icon) icon.style.transform = `translateZ(30px) translateX(${percentX * 8}px) translateY(${percentY * 8}px)`;
+            if (title) title.style.transform = `translateZ(25px) translateX(${percentX * 6}px) translateY(${percentY * 6}px)`;
+            if (desc) desc.style.transform = `translateZ(15px) translateX(${percentX * 3}px) translateY(${percentY * 3}px)`;
+            if (footer) footer.style.transform = `translateZ(20px) translateX(${percentX * 5}px) translateY(${percentY * 5}px)`;
+            */
+        }
+    }
+    
+    function handleCardMouseLeave(e) {
+        if (window.matchMedia('(hover: hover)').matches) {
+            const card = e.currentTarget;
+            
+            // Возвращаем карточку в исходное положение
+            card.style.transform = 'perspective(1000px) rotateX(0) rotateY(0) scale3d(1, 1, 1)';
+            card.style.backgroundImage = 'none';
+            
+            // Плавный возврат в исходное положение
+            card.style.transition = 'all 0.5s ease-out';
+        }
+    }
+    
+    function handleCardMouseEnter(e) {
+        if (window.matchMedia('(hover: hover)').matches) {
+            const card = e.currentTarget;
+            
+            // Отключаем transition для плавного движения за курсором
+            card.style.transition = 'background-image 0.5s ease-out';
+            
+            const icon = card.querySelector('.project-icon');
+            const title = card.querySelector('.project-title');
+            const desc = card.querySelector('.project-description');
+            const footer = card.querySelector('.project-footer');
+            
+            if (icon) icon.style.transition = 'transform 0.2s ease-out';
+            if (title) title.style.transition = 'transform 0.2s ease-out';
+            if (desc) desc.style.transition = 'transform 0.2s ease-out';
+            if (footer) footer.style.transition = 'transform 0.2s ease-out';
+        }
+    }
+    
+    // Поддержка Touch устройств
+    let initialTouchX, initialTouchY;
+    
+    function handleCardTouchStart(e) {
+        if (e.touches.length === 1) {
+            const touch = e.touches[0];
+            initialTouchX = touch.clientX;
+            initialTouchY = touch.clientY;
+            
+            const card = e.currentTarget;
+            card.style.transition = 'transform 0.2s ease-out';
+        }
+    }
+    
+    function handleCardTouchMove(e) {
+        if (e.touches.length === 1) {
+            const touch = e.touches[0];
+            const touchX = touch.clientX;
+            const touchY = touch.clientY;
+            
+            const deltaX = touchX - initialTouchX;
+            const deltaY = touchY - initialTouchY;
+            
+            // Ограничиваем угол наклона и исправляем направление
+            const tiltX = Math.min(Math.max(-deltaY * 0.03, -4), 4); // Уменьшаем интенсивность
+            const tiltY = Math.min(Math.max(deltaX * 0.03, -4), 4);  // Исправляем направление и уменьшаем
+            
+            const card = e.currentTarget;
+            card.style.transform = `perspective(1000px) rotateX(${tiltX}deg) rotateY(${tiltY}deg) scale(1.01)`;
+        }
+    }
+    
+    function handleCardTouchEnd(e) {
+        const card = e.currentTarget;
+        
+        // Плавно возвращаем карточку в исходное положение
+        card.style.transition = 'transform 0.5s ease-out';
+        card.style.transform = 'perspective(1000px) rotateX(0) rotateY(0) scale(1)';
+    }
 
     // Add 3D press effect to project cards
     projectCards.forEach(card => {

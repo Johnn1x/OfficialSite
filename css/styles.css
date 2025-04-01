@@ -139,6 +139,8 @@ body.theme5::before {
     display: flex;
     flex-direction: column;
     height: 100%;
+    transform: perspective(1000px) rotateX(0) rotateY(0);
+    will-change: transform;
 }
 
 .project-card::before {
@@ -160,29 +162,58 @@ body.theme5::before {
     transition: all 0.4s ease;
 }
 
+.project-card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(125deg, 
+        rgba(255, 255, 255, 0) 0%,
+        rgba(255, 255, 255, 0.05) 20%, 
+        rgba(255, 255, 255, 0.1) 40%, 
+        rgba(255, 255, 255, 0.05) 60%, 
+        rgba(255, 255, 255, 0) 100%);
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    z-index: 1;
+    pointer-events: none;
+    border-radius: 20px;
+}
+
 .project-card:hover {
-    transform: translateY(-8px) rotateX(2deg) rotateY(2deg) scale(1.01);
-    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+    transform: translateY(-8px) scale(1.01);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
     border-color: rgba(255, 255, 255, 0.3);
 }
 
+.project-card:hover::after {
+    opacity: 1;
+    animation: shine 2s infinite;
+}
+
 .project-card:active {
-    transform: translateY(-4px) translateZ(-5px) rotateX(5deg) rotateY(5deg) scale(0.99);
+    transform: translateY(-4px) scale(0.99);
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
     transition: all 0.2s ease;
 }
 
-.project-card:hover::before {
-    opacity: 0.8;
-    background-position: 100% 100%;
+@keyframes shine {
+    0% {
+        background-position: -100% 0;
+    }
+    100% {
+        background-position: 200% 0;
+    }
 }
 
-.project-card:not(:hover) {
-    transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1);
+/* 3D Card Effect */
+.card-3d-container {
+    perspective: 1500px;
+    transform-style: preserve-3d;
 }
 
-.project-icon, .project-title, .project-description, .project-link {
-    transition: all 0.4s ease-out;
+.project-content, .project-icon, .project-footer {
+    position: relative;
+    z-index: 2;
 }
 
 .project-icon {
@@ -196,8 +227,29 @@ body.theme5::before {
     margin: 0 auto 20px;
     font-size: 36px;
     border: 2px solid rgba(255, 255, 255, 0.5);
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2), 
+                inset 0 2px 5px rgba(255, 255, 255, 0.1);
     position: relative;
+    transition: transform 0.4s ease, box-shadow 0.4s ease;
+    overflow: hidden;
+}
+
+.project-icon::after {
+    content: '';
+    position: absolute;
+    top: -10px;
+    left: -10px;
+    right: -10px;
+    bottom: -10px;
+    background: radial-gradient(circle at 50% 50%, 
+                rgba(255, 255, 255, 0.15), 
+                rgba(255, 255, 255, 0) 70%);
+    opacity: 0;
+    transition: opacity 0.4s ease;
+}
+
+.project-card:hover .project-icon::after {
+    opacity: 1;
 }
 
 .project-icon i {
@@ -255,26 +307,34 @@ body.theme5::before {
 }
 
 .project-title {
-    font-size: 22px;
+    font-size: 24px;
     font-weight: 700;
-    margin-bottom: 15px;
+    margin-bottom: 12px;
     letter-spacing: 0.5px;
+    background: linear-gradient(90deg, #ffffff, #aaaaaa);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.15));
+    transform: translateZ(5px);
 }
 
 .project-description {
-    font-size: 15px;
+    font-size: 16px;
     line-height: 1.6;
     color: rgba(255, 255, 255, 0.8);
-    margin-bottom: 25px;
+    margin-bottom: 20px;
+    transform: translateZ(2px);
 }
 
 .project-content {
-    flex-grow: 1;
+    flex: 1;
+    transform: translateZ(10px);
 }
 
 .project-footer {
     margin-top: auto;
-    text-align: left;
+    transform: translateZ(15px);
 }
 
 .project-link, .telegram-btn {
@@ -295,8 +355,8 @@ body.theme5::before {
 
 /* Telegram button specific styles */
 .telegram-btn {
-    background: rgba(0, 95, 139, 0.4);
-    border-color: rgba(0, 130, 180, 0.35);
+    background: rgba(0, 136, 204, 0.55);
+    border-color: rgba(0, 160, 220, 0.5);
     padding: 14px 32px;
     font-weight: 700;
     letter-spacing: 0.5px;
@@ -309,11 +369,11 @@ body.theme5::before {
 }
 
 .telegram-btn::before {
-    background: linear-gradient(90deg, transparent, rgba(100, 210, 255, 0.3), transparent);
+    background: linear-gradient(90deg, transparent, rgba(150, 230, 255, 0.4), transparent);
 }
 
 .telegram-btn:hover {
-    background: rgba(0, 95, 139, 0.5);
+    background: rgba(0, 150, 215, 0.65);
 }
 
 .project-link:active, .telegram-btn:active {
@@ -337,6 +397,7 @@ body.theme5::before {
 }
 
 @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
     to { opacity: 1; transform: translateY(0); }
 }
 
@@ -612,5 +673,13 @@ body.en .lang-ru {
         width: 40px;
         height: 40px;
         font-size: 14px;
+    }
+}
+
+/* Add JS support for 3D card effect */
+@media (hover: hover) {
+    .tilt-effect {
+        transition: transform 0.1s ease;
+        transform-style: preserve-3d;
     }
 } 
